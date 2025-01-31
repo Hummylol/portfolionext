@@ -24,6 +24,20 @@
   transform-origin: 70% 70%; 
 }
 
+@font-face {
+  font-family: 'Qinferly - Personal use';
+  src: url('../fonts/QinferlyPersonaluse.woff2') format('woff2'),
+      url('../fonts/QinferlyPersonaluse.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.custfont{
+  font-family:'Qinferly - Personal use' ;
+}
+
+
 @layer base {
   :root {
     --background: 0 0% 100%;
