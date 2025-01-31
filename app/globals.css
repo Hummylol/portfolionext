@@ -26,8 +26,8 @@
 
 @font-face {
   font-family: 'Qinferly - Personal use';
-  src: url('../public//fonts/QinferlyPersonaluse.woff2') format('woff2'),
-      url('../public//fonts/QinferlyPersonaluse.woff') format('woff');
+  src: url('../public//font/QinferlyPersonaluse.woff2') format('woff2'),
+      url('../public//font/QinferlyPersonaluse.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
