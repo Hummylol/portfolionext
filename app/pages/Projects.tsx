@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+
+
 const projects = [
   { name: "Chat App" },
   { name: "Portfolio Website" },
@@ -17,14 +19,16 @@ const Projects = () => {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
+  
+
   return (
-    <div className="h-full w-full flex justify-center items-center">
+    <div className="h-full w-full flex justify-center items-center dark:bg-black">
       <section className="h-[90%] w-[90%] flex flex-col relative">
         <div className="flex flex-col gap-4 relative">
           {projects.map((project) => (
             <div
               key={project.name}
-              className="text-4xl md:text-8xl border-b dark:border-white border-black transition-all duration-300"
+              className="text-4xl md:text-8xl border-b dark:border-white  border-black transition-all duration-300"
             >
               <div
                 onMouseEnter={(e) => {
@@ -35,7 +39,7 @@ const Projects = () => {
                   setPosition({ x: e.clientX, y: e.clientY });
                 }}
                 onMouseLeave={() => setHoveredProject(null)}
-                className={`w-fit cursor-pointer transition duration-300 custfont ${
+                className={`w-fit cursor-pointer transition duration-300 font-qin ${
                   hoveredProject && hoveredProject !== project.name
                     ? "opacity-15"
                     : "blur-none opacity-100"
@@ -47,7 +51,8 @@ const Projects = () => {
           ))}
         </div>
 
-        {/* Hover Preview Box */}
+
+
         <AnimatePresence>
           {hoveredProject && (
             <motion.div
