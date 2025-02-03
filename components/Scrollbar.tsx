@@ -28,7 +28,7 @@ const Scrollbar = () => {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 w-full h-[4px] dark:h-[2px] light:bg-zinc-800">
+    <div className="fixed z-50 bottom-0 left-0 w-full h-[4px] dark:h-[2px] light:bg-zinc-800">
       <motion.div
         className="h-full dark:bg-white bg-black"
         style={{

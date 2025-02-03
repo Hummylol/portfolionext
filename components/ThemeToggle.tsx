@@ -15,15 +15,14 @@ export function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
-          variant="ghost" 
-          className="rounded-full"
+          variant="secondary" 
+          className="rounded-full border-none focus:outline-none"
           size="icon" 
           aria-label="Toggle theme" 
           aria-expanded={true}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              // Trigger the dropdown menu
             }
           }}
         >
