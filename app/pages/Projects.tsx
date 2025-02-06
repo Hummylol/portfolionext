@@ -23,7 +23,6 @@ const Projects = () => {
 
   return (
     <>
-      <h1 className="text-4xl md:text-8xl dark:text-white text-black bg-white dark:bg-black text-left">Projects</h1>
       <div className="h-fit w-full flex flex-col justify-center items-center dark:bg-black">
         <section className="h-fit w-[90%] flex flex-col relative pt-20">
           <div className="flex flex-col gap-4 relative">

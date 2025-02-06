@@ -14,7 +14,7 @@ const Skills = () => {
 
   return (
     <div className="h-screen w-full bg-white dark:bg-black overflow-hidden">
-      <div className="h-full max-w-7xl mx-auto p-2 md:p-4">
+      <div className="h-[90%] max-w-7xl mx-auto p-2 md:p-4">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-3 h-[calc(100vh-2rem)]">
           {skillsData.map((skill, index) => (
             <div
@@ -24,10 +24,11 @@ const Skills = () => {
                 setOpen(true)
               }}
               className={`
+                skills-item
                 rounded-2xl p-3 md:p-4
                 flex items-center justify-center
-                bg-black dark:bg-[#0a0a0a] 
-                text-white dark:text-white
+                bg-[#d3d3d3] dark:bg-[#161616] 
+                text-black dark:text-white 
                 hover:scale-[0.98] transition-transform cursor-pointer
                 ${index === 0 ? 'md:col-span-4 md:row-span-2' : ''}
                 ${index === 1 ? 'md:col-span-2 md:row-span-2' : ''}

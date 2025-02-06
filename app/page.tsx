@@ -9,12 +9,14 @@ import Scrollbar from '../components/Scrollbar'
 import useLenis from '@/utils/lenisSetup'
 import Navbar from '../components/Navbar'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import Cursor from '../components/Cursor'
 
 const Page = () => {
   useLenis()
   return (
     <ThemeProvider>
       <main className='h-screen'>
+        <Cursor />
         <Navbar />
         <Scrollbar />
         <Landing />

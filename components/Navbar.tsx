@@ -11,9 +11,33 @@ const Navbar = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      
+      // Calculate which section is currently in view (using 80% threshold)
+      const currentSection = Math.floor((currentScrollY + (windowHeight * 0.2)) / windowHeight);
+      
+      // Update navbar text based on current section
+      let newText = "Welcome!! 👋";
+      if (currentScrollY > 0) {
+        switch(currentSection) {
+          case 0:
+            newText = "Home";
+            break;
+          case 1:
+            newText = "Skills";
+            break;
+          case 2:
+            newText = "Projects";
+            break;
+          case 3:
+            newText = "About";
+            break;
+        }
+      }
+
       setIsVisible(currentScrollY < lastScrollY || currentScrollY === 0);
       setLastScrollY(currentScrollY);
-      setNavText(currentScrollY > 0 ? "Humaid" : "Welcome!! 👋");
+      setNavText(newText);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -30,7 +54,13 @@ const Navbar = () => {
           ${isVisible ? "w-full translate-y-0" : "w-[50%] rounded-3xl opacity-75 text-transparent"}`}
       >
         <div className="logo text-md sm:text-sm lg:text-xl dark:text-white text-black">
-          {navText}
+          {navText.includes("👋") ? (
+            <>
+              Welcome!! <span className="wave-hand">👋</span>
+            </>
+          ) : (
+            navText
+          )}
         </div>
         <div className="dark:text-white text-black">
           <ThemeToggle />
