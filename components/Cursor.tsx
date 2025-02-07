@@ -59,13 +59,14 @@ const Cursor = () => {
           rounded-full 
           bg-[#000000]
           dark:bg-[#ffffff]
+          invert-0
           transition-all 
           duration-150
-          ${isHovering ? 'w-[150px] h-[150px]' : 'w-[50px] h-[50px]'}
+          ${isHovering ? 'w-[100px] h-[100px]' : 'w-[50px] h-[50px]'}
         `}>
           {isHovering && (
-            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs whitespace-nowrap text-white dark:text-black">
-              {cursorText}
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] whitespace-nowrap text-white dark:text-black">
+              Click for more info
             </span>
           )}
         </div>

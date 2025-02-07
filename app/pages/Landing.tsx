@@ -1,40 +1,81 @@
-import React, { useEffect } from 'react'
-import { gsap } from 'gsap'
+"use client";
 
-const Landing = () => {
-  const letters = "HUMAID".split("");
+import { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
+const roles = ["Creative Dev", "UI/UX Engineer", "Frontend Wizard"];
+
+const HeroSection = () => {
+  const [currentRole, setCurrentRole] = useState(0);
+  const roleContainerRef = useRef(null);
+  const codeRef = useRef(null);
 
   useEffect(() => {
-    letters.forEach((letter, index) => {
-      const additionalDelay = (letter === 'A' || letter === 'I' || letter === 'D') ? 0.05 : 0;
-      gsap.fromTo(  
-        `#letter-${index}`,
-        { y: 450 }, 
-        { 
-          y: 0, 
-          delay: index * 0.05 + additionalDelay,
-          duration: 0.8,
-          ease: "power3.out"
+    let interval = setInterval(() => {
+      gsap.to(roleContainerRef.current, {
+        y: 20,
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.out",
+        onComplete: () => {
+          setCurrentRole((prev) => (prev + 1) % roles.length);
+          gsap.fromTo(
+            roleContainerRef.current,
+            { y: -20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
+          );
         }
-      );
-    });
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    gsap.fromTo(
+      ".fade-in",
+      { opacity: 0, y: 50 },
+      { opacity: 1, y: 0, duration: 1, stagger: 0.2 }
+    );
+
+    gsap.fromTo(
+      codeRef.current,
+      { opacity: 0, scale: 0.9 },
+      { opacity: 0.1, scale: 1.2, duration: 1 }
+    );
   }, []);
 
   return (
-    <div className='h-full w-full dark:bg-black bg-white dark:text-white flex justify-center items-center text-[30vw] font-medium relative'>
-      {letters.map((letter, index) => (
-        <span 
-          id={`letter-${index}`}
-          key={index} 
-          style={{ margin: '0 -0.06em' }}
-        >
-          {letter}
-        </span>
-      ))}
-      <div className='h-[30vh] w-screen dark:bg-black bg-white absolute bottom-0'></div>
-    </div>
-  )
-}
+    <section className="relative h-screen flex flex-col items-center justify-center text-center bg-white dark:bg-black text-black dark:text-white overflow-hidden">
+      <div
+        ref={codeRef}
+        className="absolute text-[20vw] font-qin opacity-10 leading-none select-none dark:text-[#fffff]"
+      >
+        CODE
+      </div>
 
-export default Landing
+      <div className="relative z-10 px-6">
+        <h1 className="text-4xl md:text-8xl font-qin fade-in">
+          Hey, I'm <span className="font-qin">Humaid</span>
+        </h1>
 
+        <p className="text-lg md:text-3xl mt-4 fade-in flex items-center justify-center gap-2">
+          I craft immersive digital experiences as a
+          <span className=" inline-flex">
+            <div className="overflow-hidden ">
+              <div ref={roleContainerRef} className="text-left font-qin w-[300px]">
+                {roles[currentRole]}
+              </div>
+            </div>
+          </span>
+        </p>
+      </div>
+    </section>
+  );
+};
+
+export default HeroSection;
