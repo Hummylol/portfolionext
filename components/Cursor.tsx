@@ -13,7 +13,6 @@ const Cursor = () => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
 
-    // Add hover detection for skills section items
     const handleHover = () => {
       const skillItems = document.querySelectorAll('.skills-item');
       
@@ -45,7 +44,7 @@ const Cursor = () => {
         animate={{
           x: mousePosition.x - (isHovering ? 75 : 25),
           y: mousePosition.y - (isHovering ? 75 : 25),
-          scale: isHovering ? 2.5 : 1,
+          scale: isHovering ? 2 : 1,
         }}
         transition={{
           type: "tween",
@@ -62,6 +61,10 @@ const Cursor = () => {
           invert-0
           transition-all 
           duration-150
+          hidden
+          md:block
+          lg:block
+          xl:block
           ${isHovering ? 'w-[100px] h-[100px]' : 'w-[50px] h-[50px]'}
         `}>
           {isHovering && (

@@ -1,18 +1,25 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger);
 
 const roles = ["Creative Dev", "UI/UX Engineer", "Frontend Wizard"];
 
 const HeroSection = () => {
   const [currentRole, setCurrentRole] = useState(0);
-  const roleContainerRef = useRef(null);
-  const codeRef = useRef(null);
+  const [roleWidth, setRoleWidth] = useState(0);
+  const roleContainerRef = useRef<HTMLDivElement>(null);
+  const roleTextRef = useRef<HTMLSpanElement>(null);
+  const codeRef = useRef<HTMLDivElement>(null);
+
+  // Update role width when role changes
+  useEffect(() => {
+    if (roleTextRef.current) {
+      const width = roleTextRef.current.offsetWidth;
+      setRoleWidth(width);
+    }
+  }, [currentRole]);
 
   useEffect(() => {
     let interval = setInterval(() => {
@@ -58,21 +65,24 @@ const HeroSection = () => {
         CODE
       </div>
 
-      <div className="relative z-10 px-6">
+      <div className="relative z-10 px-6 max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-8xl font-qin fade-in">
           Hey, I'm <span className="font-qin">Humaid</span>
         </h1>
 
-        <p className="text-lg md:text-3xl mt-4 fade-in flex items-center justify-center gap-2">
-          I craft immersive digital experiences as a
-          <span className=" inline-flex">
-            <div className="overflow-hidden ">
-              <div ref={roleContainerRef} className="text-left font-qin w-[300px]">
+        <div className="text-lg md:text-3xl mt-4 fade-in flex flex-col sm:flex-row items-center justify-center gap-2">
+          <p className="whitespace-nowrap">I craft immersive digital experiences as a</p>
+          <div className="relative" style={{ width: roleWidth ? roleWidth + 'px' : 'auto', minWidth: '150px' }}>
+            <div 
+              ref={roleContainerRef} 
+              className="font-qin"
+            >
+              <span ref={roleTextRef} className="inline-block whitespace-nowrap font-qin">
                 {roles[currentRole]}
-              </div>
+              </span>
             </div>
-          </span>
-        </p>
+          </div>
+        </div>
       </div>
     </section>
   );
