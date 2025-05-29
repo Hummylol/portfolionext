@@ -1,81 +1,267 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-
+import { Link, X } from "lucide-react";
 
 const projects = [
-  { name: "Chat App" },
-  { name: "Portfolio Website" },
-  { name: "Music Player" },
-  { name: "Code Share" },
-  { name: "Mental Health" },
-  { name: "LLM" },
-  { name: "Qusic Player" },
+  { name: "Chat App", github: "https://github.com/yourusername/chat-app" },
+  { name: "Mental Health", github: "https://github.com/yourusername/mental-health" },
+  { name: "Portfolio", github: "https://github.com/yourusername/portfolio" },
+  { name: "Devsistant", github: "https://github.com/yourusername/devsistant" },
+  { name: "Code Share", github: "https://github.com/yourusername/code-share" },
+  { name: "Music Player", github: "https://github.com/yourusername/music-player" },
+  { name: "LLM", github: "https://github.com/yourusername/llm" },
 ];
+
+// --- Custom Cursor Component ---
+const CustomCursor = ({
+  hoveredProject,
+  hoverType, // "name" or "link" or null
+  position,
+}: {
+  hoveredProject: string | null;
+  hoverType: "name" | "link" | null;
+  position: { x: number; y: number };
+}) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  if (isMobile) return null; // Disable cursor on mobile
+
+  const showPreview = hoveredProject !== null;
+
+  return (
+    <AnimatePresence>
+      {showPreview && (
+        <motion.div
+          key={hoveredProject + (hoverType ?? "")}
+          initial={{
+            opacity: 0,
+            scale: 0.8,
+            borderRadius: "50%",
+            x: position.x,
+            y: position.y,
+            translateX: "-50%",
+            translateY: "-50%",
+          }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            borderRadius: "16px",
+            x: position.x,
+            y: position.y,
+            translateX: "-50%",
+            translateY: "-50%",
+          }}
+          exit={{ opacity: 0, scale: 0.8, borderRadius: "50%" }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            pointerEvents: "none",
+            zIndex: 9999,
+            width: 600,
+            height: 350,
+            backgroundColor: "black",
+            boxShadow:
+              "0 15px 40px rgba(0,0,0,0.7), 0 0 15px rgba(255,255,255,0.15)",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          className="w-[90vw] h-[40vh] sm:w-[600px] sm:h-[350px]"
+        >
+          {hoverType === "name" && hoveredProject === "Mental Health" ? (
+            <video
+              src="mental-health-preview.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover rounded-lg"
+            />
+          ) : (
+            <span className="text-white text-lg font-semibold select-none px-6">
+              {hoveredProject} Preview
+            </span>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 const Projects = () => {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
+  const [hoverType, setHoverType] = useState<"name" | "link" | null>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+  const [modalProject, setModalProject] = useState<string | null>(null);
 
+  const enterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const handleMouseEnter = (
+    projectName: string,
+    type: "name" | "link",
+    e: React.MouseEvent
+  ) => {
+    if (isMobile) return; // Disable hover on mobile
+
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = null;
+    }
+    if (enterTimeoutRef.current) {
+      clearTimeout(enterTimeoutRef.current);
+    }
+    enterTimeoutRef.current = setTimeout(() => {
+      if (type === "link") {
+        setHoveredProject(null);
+        setHoverType(null);
+      } else {
+        setHoveredProject(projectName);
+        setHoverType(type);
+      }
+      setPosition({ x: e.clientX, y: e.clientY });
+    }, 150);
+  };
+
+  const handleMouseLeave = () => {
+    if (isMobile) return; // Disable hover on mobile
+
+    if (enterTimeoutRef.current) {
+      clearTimeout(enterTimeoutRef.current);
+      enterTimeoutRef.current = null;
+    }
+    if (!leaveTimeoutRef.current) {
+      leaveTimeoutRef.current = setTimeout(() => {
+        setHoveredProject(null);
+        setHoverType(null);
+        leaveTimeoutRef.current = null;
+      }, 150);
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isMobile) return; // Disable hover on mobile
+    setPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  // Mobile tap handler to open modal
+  const handleMobileTap = (projectName: string) => {
+    if (!isMobile) return;
+    setModalProject(projectName);
+  };
+
+  const closeModal = () => {
+    setModalProject(null);
+  };
 
   return (
     <>
-      <div className="h-fit w-full flex flex-col justify-center items-center dark:bg-black">
-        <section className="h-fit w-[90%] flex flex-col relative pt-20">
+      <div
+        id="projects-section"
+        className="min-h-screen w-full flex flex-col justify-center items-center dark:bg-black pt-20"
+      >
+        <section className="h-fit w-[90%] flex flex-col relative">
           <div className="flex flex-col gap-4 relative">
             {projects.map((project) => (
               <div
                 key={project.name}
-                className="text-4xl md:text-8xl border-b dark:border-white border-black transition-all duration-300"
+                className="text-4xl md:text-8xl border-b dark:border-white border-black transition-all duration-300 flex justify-between items-center"
               >
                 <div
-                  onMouseEnter={(e) => {
-                    setHoveredProject(project.name);
-                    setPosition({ x: e.clientX, y: e.clientY });
-                  }}
-                  onMouseMove={(e) => {
-                    setPosition({ x: e.clientX, y: e.clientY });
-                  }}
-                  onMouseLeave={() => setHoveredProject(null)}
-                  className={`w-fit cursor-pointer transition duration-300 font-qin ${hoveredProject && hoveredProject !== project.name
+                  onMouseEnter={(e) => handleMouseEnter(project.name, "name", e)}
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={handleMouseLeave}
+                  onClick={() => handleMobileTap(project.name)}
+                  className={`w-fit cursor-pointer transition duration-300 font-qin ${
+                    hoveredProject && hoveredProject !== project.name
                       ? "opacity-15"
                       : "blur-none opacity-100"
-                    }`}
+                  }`}
                 >
                   {project.name}
                 </div>
+                <a
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer p-1 hover:text-blue-500 transition-colors"
+                  aria-label={`GitHub link for ${project.name}`}
+                  onMouseEnter={(e) => handleMouseEnter(project.name, "link", e)}
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <Link />
+                </a>
               </div>
             ))}
           </div>
-
-
-
-          <AnimatePresence>
-            {hoveredProject && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                style={{
-                  position: "fixed",
-                  top: position.y + 10,
-                  left: position.x + 10,
-                  transform: "translate(-50%, -50%)",
-                }}
-                className="w-[50%] h-[20%] z-50 lg:w-[40%] lg:h-[40%] bg-black dark:bg-white shadow-lg rounded-3xl flex items-center justify-center"
-              >
-                <span className="text-white dark:text-black text-sm">
-                  {hoveredProject} Preview
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </section>
+
+        <CustomCursor
+          hoveredProject={hoveredProject}
+          hoverType={hoverType}
+          position={position}
+        />
       </div>
+
+      {/* Mobile Modal */}
+      <AnimatePresence>
+        {modalProject && (
+          <motion.div
+            key="mobile-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-90 p-4"
+            style={{ pointerEvents: "auto" }} // Ensure pointer events enabled
+          >
+            <div className="relative w-full max-w-lg rounded-lg overflow-hidden bg-black shadow-lg">
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 text-white hover:text-gray-300 z-50"
+                aria-label="Close preview"
+                type="button"
+              >
+                <X size={24} />
+              </button>
+              {modalProject === "Mental Health" ? (
+                <video
+                  src="mental-health-preview.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-auto object-cover"
+                />
+              ) : (
+                <div className="p-6 text-white text-center text-xl font-semibold">
+                  {modalProject} Preview
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

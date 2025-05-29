@@ -1,49 +1,114 @@
-import React, { useState } from 'react'
-import { skillsData } from './SkillsData'
-import { 
-  Drawer, 
-  DrawerContent, 
-  DrawerHeader, 
+import React, { useEffect, useRef, useState } from "react";
+import { createSwapy } from "swapy";
+import clsx from "clsx";
+import { skillsData } from "./SkillsData";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
   DrawerTitle,
-  DrawerDescription 
-} from '@/components/ui/drawer'
+  DrawerDescription,
+} from "@/components/ui/drawer";
 
-const Skills = () => {
-  const [selectedSkill, setSelectedSkill] = useState<typeof skillsData[0] | null>(null)
-  const [open, setOpen] = useState(false)
+const spanPattern = [
+  { col: 4, row: 2 },
+  { col: 2, row: 1 },
+  { col: 2, row: 1 },
+  { col: 3, row: 1 },
+  { col: 2, row: 1 },
+  { col: 1, row: 1 },
+  { col: 2, row: 2 },
+  { col: 4, row: 2 },
+];
+
+const SwappableComponent = () => {
+  const swapyInstance = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [selectedSkill, setSelectedSkill] = useState<typeof skillsData[0] | null>(
+    null
+  );
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      swapyInstance.current = createSwapy(containerRef.current);
+      swapyInstance.current.onSwap?.(() => {});
+    }
+    return () => {
+      swapyInstance.current?.destroy?.();
+    };
+  }, []);
 
   return (
-    <div className="h-screen w-full bg-white dark:bg-black overflow-hidden">
-      <div className="h-[90%] max-w-7xl mx-auto p-2 md:p-4">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-2 md:gap-3 h-[calc(100vh-2rem)]">
-          {skillsData.map((skill, index) => (
+    <div
+      id="skills-section"
+      className="pt-4 flex justify-center items-center h-screen bg-white dark:bg-black"
+    >
+      <div
+        ref={containerRef}
+        className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-6 gap-2 w-4/5 h-[90%] p-4"
+      >
+        {skillsData.map((skill, i) => {
+          const { col, row } = spanPattern[i];
+
+          return (
             <div
-              key={index}
+              key={skill.h2Content}
+              data-swapy-slot={skill.swapySlot}
+              className={clsx(
+                "col-span-1 row-span-1", // mobile default
+
+                // sm col-span
+                {
+                  "sm:col-span-1": col === 1,
+                  "sm:col-span-2": col === 2,
+                  "sm:col-span-3": col === 3,
+                  "sm:col-span-4": col >= 4,
+                },
+
+                // sm row-span
+                {
+                  "sm:row-span-1": row === 1,
+                  "sm:row-span-2": row === 2,
+                  "sm:row-span-3": row === 3,
+                  "sm:row-span-4": row >= 4,
+                },
+
+                // lg col-span
+                {
+                  "lg:col-span-1": col === 1,
+                  "lg:col-span-2": col === 2,
+                  "lg:col-span-3": col === 3,
+                  "lg:col-span-4": col === 4,
+                  "lg:col-span-5": col === 5,
+                  "lg:col-span-6": col === 6,
+                },
+
+                // lg row-span
+                {
+                  "lg:row-span-1": row === 1,
+                  "lg:row-span-2": row === 2,
+                  "lg:row-span-3": row === 3,
+                  "lg:row-span-4": row === 4,
+                }
+              )}
               onClick={() => {
-                setSelectedSkill(skill)
-                setOpen(true)
+                setSelectedSkill(skill);
+                setOpen(true);
               }}
-              className={`
-                skills-item
-                rounded-2xl p-3 md:p-4
-                flex items-center justify-center
-                bg-[#d3d3d3] dark:bg-[#161616] 
-                text-black dark:text-white 
-                hover:scale-[0.98] transition-transform cursor-pointer
-                ${index === 0 ? 'md:col-span-4 md:row-span-2' : ''}
-                ${index === 1 ? 'md:col-span-2 md:row-span-2' : ''}
-                ${index === 2 ? 'md:col-span-3' : ''}
-                ${index === 3 ? 'md:col-span-3' : ''}
-                ${index === 4 ? 'md:col-span-2 md:row-span-2' : ''}
-                ${index === 5 ? 'md:col-span-2' : ''}
-                ${index === 6 ? 'md:col-span-2 ' : ''}
-                ${index === 7 ? 'md:col-span-4 ' : ''}
-              `}
+              style={{ cursor: "pointer" }}
             >
-              <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-center">{skill.h2Content}</h2>
+              <div
+                data-swapy-item={skill.swapyItem}
+                className="p-4 bg-[#cccccc8a] dark:bg-[#181818] text-black dark:text-white text-center rounded-xl font-bold h-full flex items-center justify-center"
+                
+              >
+                <h2 className="text-lg font-semibold">{skill.h2Content}</h2>
+              </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
       <Drawer open={open} onOpenChange={setOpen}>
@@ -52,22 +117,23 @@ const Skills = () => {
             <DrawerTitle className="text-2xl font-bold">
               {selectedSkill?.h2Content}
             </DrawerTitle>
-            <DrawerDescription>
-              {selectedSkill?.additionalData}
-            </DrawerDescription>
+            <DrawerDescription>{selectedSkill?.additionalData}</DrawerDescription>
           </DrawerHeader>
-          
+
           <div className="space-y-6">
             <div>
               <h3 className="text-xl font-semibold mb-4">Sample Projects</h3>
               <div className="space-y-4">
                 {selectedSkill?.sampleProjects.map((project, index) => (
-                  <div key={index} className="p-4 rounded-lg dark:bg-white/10 bg-black/10">
+                  <div
+                    key={index}
+                    className="p-4 rounded-lg dark:bg-white/10 bg-black/10"
+                  >
                     <h4 className="text-lg font-semibold">{project.projectName}</h4>
                     <p className="text-sm mt-2">{project.projectDescription}</p>
                     <div className="flex flex-wrap gap-2 mt-3">
                       {project.technologiesUsed.map((tech, idx) => (
-                        <span 
+                        <span
                           key={idx}
                           className="px-3 py-1 text-sm rounded-full dark:bg-white/20 bg-black/20"
                         >
@@ -82,7 +148,7 @@ const Skills = () => {
 
             <div className="flex items-center gap-4">
               <div className="h-4 w-full bg-gray-200 dark:bg-white/20 rounded-full">
-                <div 
+                <div
                   className="h-full bg-black dark:bg-white rounded-full"
                   style={{ width: `${selectedSkill?.percentage}%` }}
                 />
@@ -93,7 +159,7 @@ const Skills = () => {
         </DrawerContent>
       </Drawer>
     </div>
-  )
-}
+  );
+};
 
-export default Skills
+export default SwappableComponent;

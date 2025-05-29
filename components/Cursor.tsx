@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Cursor = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
-  const [cursorText, setCursorText] = useState('');
+  const [cursorText, setCursorText] = useState("");
 
   useEffect(() => {
     const updateMousePosition = (e: MouseEvent) => {
@@ -14,26 +14,35 @@ const Cursor = () => {
     };
 
     const handleHover = () => {
-      const skillItems = document.querySelectorAll('.skills-item');
-      
-      skillItems.forEach(item => {
-        item.addEventListener('mouseenter', () => {
+      // Select all GitHub link anchors (adjust selector if needed)
+      const githubLinks = document.querySelectorAll('a[href*="github.com"]');
+
+      githubLinks.forEach((link) => {
+        link.addEventListener("mouseenter", () => {
           setIsHovering(true);
-          setCursorText('Click to open drawer');
+          setCursorText("Github Link");
         });
-        
-        item.addEventListener('mouseleave', () => {
+        link.addEventListener("mouseleave", () => {
           setIsHovering(false);
-          setCursorText('');
+          setCursorText("");
         });
       });
     };
 
-    window.addEventListener('mousemove', updateMousePosition);
+    window.addEventListener("mousemove", updateMousePosition);
     handleHover();
 
+    // Re-run handleHover if DOM changes (optional)
+    // You can add a MutationObserver here if your links change dynamically
+
     return () => {
-      window.removeEventListener('mousemove', updateMousePosition);
+      window.removeEventListener("mousemove", updateMousePosition);
+      // Cleanup event listeners on links
+      const githubLinks = document.querySelectorAll('a[href*="github.com"]');
+      githubLinks.forEach((link) => {
+        link.removeEventListener("mouseenter", () => {});
+        link.removeEventListener("mouseleave", () => {});
+      });
     };
   }, []);
 
@@ -53,7 +62,8 @@ const Cursor = () => {
           mass: 0.5,
         }}
       >
-        <div className={`
+        <div
+          className={`
           relative 
           rounded-full 
           bg-[#000000]
@@ -65,11 +75,12 @@ const Cursor = () => {
           md:block
           lg:block
           xl:block
-          ${isHovering ? 'w-[100px] h-[100px]' : 'w-[50px] h-[50px]'}
-        `}>
+          ${isHovering ? "w-[100px] h-[100px]" : "w-[50px] h-[50px]"}
+        `}
+        >
           {isHovering && (
             <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] whitespace-nowrap text-white dark:text-black">
-              Click for more info
+              {cursorText}
             </span>
           )}
         </div>
@@ -78,4 +89,4 @@ const Cursor = () => {
   );
 };
 
-export default Cursor; 
+export default Cursor;

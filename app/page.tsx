@@ -20,8 +20,8 @@ const Page = () => {
         <Navbar />
         <Scrollbar />
         <Landing />
-        <Skills />
         <Projects />
+        <Skills />
         <About />
       </main>
     </ThemeProvider>

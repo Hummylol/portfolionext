@@ -13,10 +13,8 @@ const Navbar = () => {
       const currentScrollY = window.scrollY;
       const windowHeight = window.innerHeight;
       
-      // Calculate which section is currently in view (using 80% threshold)
       const currentSection = Math.floor((currentScrollY + (windowHeight * 0.2)) / windowHeight);
       
-      // Update navbar text based on current section
       let newText = "Welcome!! 👋";
       if (currentScrollY > 0) {
         switch(currentSection) {
@@ -24,10 +22,10 @@ const Navbar = () => {
             newText = "Home";
             break;
           case 1:
-            newText = "Skills";
+            newText = "Projects";
             break;
           case 2:
-            newText = "Projects";
+            newText = "Skills";
             break;
           case 3:
             newText = "About";
