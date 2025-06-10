@@ -2,16 +2,16 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, X } from "lucide-react";
+import { Link, X, Github, ExternalLink } from "lucide-react";
 
 const projects = [
-  { name: "Chat App", github: "https://github.com/yourusername/chat-app" },
-  { name: "Mental Health", github: "https://github.com/yourusername/mental-health" },
-  { name: "Portfolio", github: "https://github.com/yourusername/portfolio" },
-  { name: "Devsistant", github: "https://github.com/yourusername/devsistant" },
-  { name: "Code Share", github: "https://github.com/yourusername/code-share" },
-  { name: "Music Player", github: "https://github.com/yourusername/music-player" },
-  { name: "LLM", github: "https://github.com/yourusername/llm" },
+  { name: "Chat App", github: "https://github.com/Hummylol/oneonone", external: "https://humaidchat.vercel.app/", video: "chat-app-preview.mp4" },
+  { name: "Mental Health", github: "https://github.com/Hummylol/mindcare", external: "https://mindcarejce.vercel.app/", video: "mental-health-preview.mp4" },
+  { name: "Portfolio", github: "https://github.com/Hummylol/portfolionext", video: "portfolio-preview.mp4" },
+  { name: "Devsistant", github: "https://github.com/Hummylol/devsistant", external: "https://devsistant.vercel.app/", video: "devsistant-preview.mp4" },
+  { name: "Code Share", github: "https://github.com/Hummylol/code-share", external: "https://analanbu.vercel.app", video: "code-share-preview.mp4" },
+  { name: "Music Player", github: "https://github.com/yourusername/music-player", video: "music-player-preview.mp4" },
+  { name: "LLM", github: "https://github.com/yourusername/llm", video: "llm-preview.mp4" },
 ];
 
 // --- Custom Cursor Component ---
@@ -80,9 +80,9 @@ const CustomCursor = ({
           }}
           className="w-[90vw] h-[40vh] sm:w-[600px] sm:h-[350px]"
         >
-          {hoverType === "name" && hoveredProject === "Mental Health" ? (
+          {(hoverType === "name" && projects.find(p => p.name === hoveredProject)?.video) ? (
             <video
-              src="mental-health-preview.mp4"
+              src={projects.find(p => p.name === hoveredProject)?.video}
               autoPlay
               loop
               muted
@@ -200,18 +200,34 @@ const Projects = () => {
                 >
                   {project.name}
                 </div>
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="cursor-pointer p-1 hover:text-blue-500 transition-colors"
-                  aria-label={`GitHub link for ${project.name}`}
-                  onMouseEnter={(e) => handleMouseEnter(project.name, "link", e)}
-                  onMouseMove={handleMouseMove}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <Link />
-                </a>
+                <div className="flex items-center gap-2 md:gap-4">
+                  <a
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="cursor-pointer p-1 hover:text-blue-500 transition-colors"
+                    aria-label={`GitHub repository for ${project.name}`}
+                    onMouseEnter={(e) => handleMouseEnter(project.name, "link", e)}
+                    onMouseMove={handleMouseMove}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <Github className="w-4 h-4 md:w-6 md:h-6" />
+                  </a>
+                  {project.external && (
+                    <a
+                      href={project.external}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="cursor-pointer p-1 hover:text-blue-500 transition-colors"
+                      aria-label={`Live demo for ${project.name}`}
+                      onMouseEnter={(e) => handleMouseEnter(project.name, "link", e)}
+                      onMouseMove={handleMouseMove}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      <ExternalLink className="w-4 h-4 md:w-6 md:h-6" />
+                    </a>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -244,9 +260,9 @@ const Projects = () => {
               >
                 <X size={24} />
               </button>
-              {modalProject === "Mental Health" ? (
+              {modalProject && projects.find(p => p.name === modalProject)?.video ? (
                 <video
-                  src="mental-health-preview.mp4"
+                  src={projects.find(p => p.name === modalProject)?.video}
                   autoPlay
                   loop
                   muted

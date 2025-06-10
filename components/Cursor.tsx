@@ -14,13 +14,26 @@ const Cursor = () => {
     };
 
     const handleHover = () => {
-      // Select all GitHub link anchors (adjust selector if needed)
-      const githubLinks = document.querySelectorAll('a[href*="github.com"]');
+      // Select GitHub links
+      const githubLinks = document.querySelectorAll('a[aria-label*="GitHub"]');
+      // Select External links
+      const externalLinks = document.querySelectorAll('a[aria-label*="Live demo"]');
 
       githubLinks.forEach((link) => {
         link.addEventListener("mouseenter", () => {
           setIsHovering(true);
-          setCursorText("Github Link");
+          setCursorText("GitHub Link");
+        });
+        link.addEventListener("mouseleave", () => {
+          setIsHovering(false);
+          setCursorText("");
+        });
+      });
+
+      externalLinks.forEach((link) => {
+        link.addEventListener("mouseenter", () => {
+          setIsHovering(true);
+          setCursorText("External Link");
         });
         link.addEventListener("mouseleave", () => {
           setIsHovering(false);
@@ -32,14 +45,18 @@ const Cursor = () => {
     window.addEventListener("mousemove", updateMousePosition);
     handleHover();
 
-    // Re-run handleHover if DOM changes (optional)
-    // You can add a MutationObserver here if your links change dynamically
-
     return () => {
       window.removeEventListener("mousemove", updateMousePosition);
-      // Cleanup event listeners on links
-      const githubLinks = document.querySelectorAll('a[href*="github.com"]');
+      // Cleanup event listeners
+      const githubLinks = document.querySelectorAll('a[aria-label*="GitHub"]');
+      const externalLinks = document.querySelectorAll('a[aria-label*="Live demo"]');
+
       githubLinks.forEach((link) => {
+        link.removeEventListener("mouseenter", () => {});
+        link.removeEventListener("mouseleave", () => {});
+      });
+
+      externalLinks.forEach((link) => {
         link.removeEventListener("mouseenter", () => {});
         link.removeEventListener("mouseleave", () => {});
       });
