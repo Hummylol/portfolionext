@@ -30,6 +30,9 @@ const Navbar = () => {
           case 3:
             newText = "About";
             break;
+          case 4:
+            newText = "About";
+            break;
         }
       }
 

@@ -1,240 +1,326 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+"use client"
 
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef, useState } from "react"
+import { gsap } from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { TextPlugin } from "gsap/TextPlugin"
 
-// Data for your tiles
-const tileData = [
-  {
-    id: 'school',
-    title: 'School',
-    shortInfo: 'Early education journey and foundation.',
-    longInfo:
-      'My journey began at [School Name], where I developed a strong foundation in various subjects. I actively participated in [mention specific activities/achievements, e.g., debate club, science fairs, sports], learning the importance of [e.g., teamwork, critical thinking]. This period laid the groundwork for my future endeavors, fostering a deep curiosity and a strong work ethic. I particularly enjoyed [favorite subject] and found great satisfaction in [a specific achievement].',
-  },
-  {
-    id: 'college',
-    title: 'College',
-    shortInfo: 'Higher education and specialized learning.',
-    longInfo:
-      'I pursued my [Degree] in [Major] at [University Name]. This period was pivotal for deep-diving into [mention key subjects/areas, e.g., software engineering, design principles, data structures]. I worked on several impactful projects, including [mention a notable project or two, e.g., a real-time chat application, an AI-powered recommendation system], which honed my skills in [e.g., full-stack development, machine learning, software architecture]. I also enjoyed [a specific course or academic group].',
-  },
-  {
-    id: 'internship',
-    title: 'Internship',
-    shortInfo: 'Practical experience and industry insights.',
-    longInfo:
-      'My internship at [Company Name] as a [Your Role] provided invaluable real-world experience. I contributed to [mention specific projects/tasks, e.g., developing a new feature for their flagship product, optimizing existing code for performance, conducting user research for a new initiative]. This role significantly expanded my understanding of [e.g., agile methodologies, collaborative problem-solving in a corporate environment, scalable systems design]. I particularly enjoyed [a specific aspect or challenge].',
-  },
-  {
-    id: 'extraCurricular',
-    title: 'Extra Curricular',
-    shortInfo: 'Passions beyond academics and professional life.',
-    longInfo:
-      'Outside of my formal education and work, I am passionate about [mention a hobby/activity, e.g., photography, volunteering for environmental causes, competitive coding, playing a musical instrument, graphic design]. These activities allow me to [mention what you gain, e.g., express creativity in a different medium, give back to the community, stay sharp and analytical, unwind and explore new forms of expression]. I believe they contribute significantly to my holistic development and perspective.',
-  },
-];
-
-// Helper to store initial positions, calculated once
-const initialTileProperties = new Map<string, { x: number; y: number; width: number; height: number }>();
+gsap.registerPlugin(ScrollTrigger, TextPlugin)
 
 const About = () => {
-  const topRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const leftDrawerRef = useRef<HTMLDivElement>(null);
-  const rightDrawerRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const gridContainerRef = useRef<HTMLDivElement>(null);
-  const tileRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const topRef = useRef<HTMLDivElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const leftDrawerRef = useRef<HTMLDivElement>(null)
+  const rightDrawerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const dotsRef = useRef<HTMLDivElement[]>([])
+  const linesRef = useRef<HTMLDivElement[]>([])
+  const textRef = useRef<HTMLDivElement>(null)
+  const morphRef = useRef<HTMLDivElement>(null)
+  const numbersRef = useRef<HTMLDivElement[]>([])
+  const detailsRef = useRef<HTMLDivElement>(null)
+  const contactRef = useRef<HTMLDivElement>(null)
 
-  // State to manage which tile is expanded
-  const [expandedTileId, setExpandedTileId] = useState<string | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
-  // Memoized callback to get initial tile positions when they first render
-  const initializeTilePositions = useCallback(() => {
-    if (tileRefs.current.length > 0 && !initialTileProperties.size) {
-      tileRefs.current.forEach((tileEl) => {
-        if (tileEl && tileEl.dataset.id) {
-          const rect = tileEl.getBoundingClientRect();
-          initialTileProperties.set(tileEl.dataset.id, {
-            x: rect.left,
-            y: rect.top,
-            width: rect.width,
-            height: rect.height,
-          });
-        }
-      });
-    }
-  }, []);
+  const detailsData = {
+    education: {
+      title: "EDUCATION",
+      details: [
+        "Bachelor's in Information Technology",
+        "Jerusalem College Of Engineering",
+        "2022 - 2026",
+        "Relevant Coursework: Data Structures, Web Development, UI/UX Design",
+      ],
+    },
+    internship: {
+      title: "INTERNSHIP",
+      details: [
+        "Frontend Developer Intern",
+        "Visual Tech",
+        "Summer 2024",
+        "Built responsive web applications using React",
+      ],
+    },
+    projects: {
+      title: "PROJECTS",
+      details: [
+        "Portfolio Website (React, TypeScript)",
+        "E-commerce Platform (Next.js, Tailwind)",
+        "Task Management App (React, Firebase)",
+        "Weather Dashboard (React, OpenWeather API)",
+      ],
+    },
+    hobbies: {
+      title: "INTERESTS",
+      details: ["Digital Art & Design", "Photography", "Open Source Contributing", "Learning New Technologies"],
+    },
+  }
 
   useEffect(() => {
-    // Call this after tiles are rendered to capture their initial states
-    initializeTilePositions();
-
     const mainTl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
-        start: 'top top',
-        end: '+=100%',
+        start: "top top",
+        end: "+=100%",
         scrub: 1,
         pin: true,
       },
-    });
+    })
 
-    mainTl.to(topRef.current, {
-      yPercent: -101,
-      ease: 'none',
-    }).to(
-      bottomRef.current,
-      {
-        yPercent: 101,
-        ease: 'none',
-      },
-      '<',
-    );
+    // Create animated dots
+    const createDots = () => {
+      const container = contentRef.current
+      if (!container) return
 
+      for (let i = 0; i < 50; i++) {
+        const dot = document.createElement("div")
+        dot.className = "absolute w-1 h-1 bg-black dark:bg-white rounded-full opacity-0"
+        dot.style.left = Math.random() * 100 + "%"
+        dot.style.top = Math.random() * 100 + "%"
+        container.appendChild(dot)
+        dotsRef.current.push(dot)
+      }
+    }
+
+    createDots()
+
+    // Initial states
+    gsap.set(contentRef.current, { opacity: 0 })
+    gsap.set(dotsRef.current, { scale: 0, opacity: 0 })
+    gsap.set(linesRef.current, { scaleX: 0, transformOrigin: "left center" })
+    gsap.set(textRef.current, { y: 100, opacity: 0 })
+    gsap.set(morphRef.current, { scale: 0, rotation: 0 })
+    gsap.set(numbersRef.current, { y: 50, opacity: 0 })
+    gsap.set(detailsRef.current, { y: 30, opacity: 0 })
+    gsap.set(contactRef.current, { y: 20, opacity: 0 })
+
+    // Main drawer animation
+    mainTl
+      .to(topRef.current, {
+        yPercent: -101,
+        ease: "none",
+      })
+      .to(
+        bottomRef.current,
+        {
+          yPercent: 101,
+          ease: "none",
+        },
+        "<",
+      )
+
+    mainTl
+      .to(
+        leftDrawerRef.current,
+        {
+          xPercent: -101,
+          ease: "power2.out",
+        },
+        "0.2",
+      )
+      .to(
+        rightDrawerRef.current,
+        {
+          xPercent: 101,
+          ease: "power2.out",
+        },
+        "<",
+      )
+
+    // Content reveal sequence
     mainTl.to(
-      leftDrawerRef.current,
+      contentRef.current,
       {
-        xPercent: -101,
-        ease: 'power2.out',
+        opacity: 1,
+        duration: 0.3,
       },
-      '0.2',
-    ).to(
-      rightDrawerRef.current,
+      "0.5",
+    )
+
+    // Animated dots explosion
+    mainTl.to(
+      dotsRef.current,
       {
-        xPercent: 101,
-        ease: 'power2.out',
+        scale: 1,
+        opacity: 1,
+        duration: 1.5,
+        stagger: {
+          amount: 0.8,
+          from: "center",
+          grid: "auto",
+        },
+        ease: "back.out(2)",
       },
-      '<',
-    );
+      "0.6",
+    )
+
+    // Morphing shape animation
+    mainTl.to(
+      morphRef.current,
+      {
+        scale: 1,
+        rotation: 360,
+        duration: 2,
+        ease: "power2.out",
+      },
+      "0.7",
+    )
+
+    // Lines animation
+    mainTl.to(
+      linesRef.current,
+      {
+        scaleX: 1,
+        duration: 1,
+        stagger: 0.1,
+        ease: "power3.out",
+      },
+      "0.8",
+    )
+
+    // Text reveal with typewriter effect
+    mainTl.to(
+      textRef.current,
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: "power3.out",
+      },
+      "1.0",
+    )
+
+    // Numbers counting animation
+    mainTl.to(
+      numbersRef.current,
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "back.out(1.7)",
+      },
+      "1.2",
+    )
+
+    // Details section animation
+    mainTl.to(
+      detailsRef.current,
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.6,
+        ease: "power3.out",
+      },
+      "1.4",
+    )
+
+    // Contact section animation
+    mainTl.to(
+      contactRef.current,
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.5,
+        ease: "power3.out",
+      },
+      "1.6",
+    )
+
+    // Continuous animations
+    const continuousAnimations = () => {
+      // Floating dots
+      dotsRef.current.forEach((dot, i) => {
+        gsap.to(dot, {
+          y: "random(-20, 20)",
+          x: "random(-20, 20)",
+          duration: "random(2, 4)",
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          delay: i * 0.1,
+        })
+      })
+
+      // Morphing shape continuous rotation
+      gsap.to(morphRef.current, {
+        rotation: "+=360",
+        duration: 20,
+        repeat: -1,
+        ease: "none",
+      })
+
+      // Text scramble effect
+      const scrambleText = () => {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        const originalText = "CREATIVE DEVELOPER"
+        let iterations = 0
+
+        const interval = setInterval(() => {
+          if (textRef.current) {
+            textRef.current.innerText = originalText
+              .split("")
+              .map((letter, index) => {
+                if (index < iterations) {
+                  return originalText[index]
+                }
+                return chars[Math.floor(Math.random() * 26)]
+              })
+              .join("")
+          }
+
+          if (iterations >= originalText.length) {
+            clearInterval(interval)
+          }
+
+          iterations += 1 / 3
+        }, 30)
+      }
+
+      setTimeout(scrambleText, 2000)
+    }
+
+    setTimeout(continuousAnimations, 3000)
 
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-      initialTileProperties.clear(); // Clear cached properties on unmount
-    };
-  }, [initializeTilePositions]); // Dependency on initializeTilePositions
-
-  // Effect for tile expansion animation
-  useEffect(() => {
-    if (!gridContainerRef.current || initialTileProperties.size === 0) {
-      return;
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
+      dotsRef.current.forEach((dot) => dot.remove())
+      dotsRef.current = []
     }
+  }, [])
 
-    const gridRect = gridContainerRef.current.getBoundingClientRect();
-    const targetPadding = 16;
-    const targetWidth = gridRect.width - targetPadding * 2;
-    const targetHeight = gridRect.height - targetPadding * 2;
-    const targetXOffset = gridRect.left + targetPadding;
-    const targetYOffset = gridRect.top + targetPadding;
+  const addToRefs = (el: HTMLDivElement | null, index: number, type: "lines" | "numbers") => {
+    if (el && type === "lines") {
+      linesRef.current[index] = el
+    } else if (el && type === "numbers") {
+      numbersRef.current[index] = el
+    }
+  }
 
-    if (expandedTileId) {
-      setIsAnimating(true);
-      const targetTileEl = tileRefs.current.find(
-        (el) => el && el.dataset.id === expandedTileId,
-      );
-      const otherTileEls = tileRefs.current.filter(
-        (el) => el && el.dataset.id !== expandedTileId,
-      );
-
-      if (targetTileEl && targetTileEl.dataset.id) {
-        const initialProps = initialTileProperties.get(targetTileEl.dataset.id);
-        if (!initialProps) return;
-
-        // Animate the expanded tile
-        gsap.to(targetTileEl, {
-          x: targetXOffset - initialProps.x,
-          y: targetYOffset - initialProps.y,
-          width: targetWidth,
-          height: targetHeight,
-          duration: 0.6,
-          ease: 'power3.inOut',
-          zIndex: 50,
-          onStart: () => {
-            // Show expanded content at the start of expansion
-            gsap.set(targetTileEl.querySelector('.expanded-content'), {
-              autoAlpha: 1,
-              pointerEvents: 'auto',
-            });
-          },
-          onComplete: () => {
-            setIsAnimating(false);
-          },
-        });
-
-        // Hide other tiles
-        gsap.to(otherTileEls, {
-          opacity: 0,
-          scale: 0.9,
-          duration: 0.3,
-          ease: 'power2.out',
-          pointerEvents: 'none',
-        });
-
-        // Hide short content
-        gsap.set(targetTileEl.querySelector('.short-content'), {
-          autoAlpha: 0,
-        });
-      }
-    } else {
-      // Restore all tiles to their initial state
-      setIsAnimating(true);
-      tileRefs.current.forEach((tileEl) => {
-        if (tileEl && tileEl.dataset.id) {
-          const initialProps = initialTileProperties.get(tileEl.dataset.id);
-          if (initialProps) {
-            // Hide expanded content before starting the minimize animation
-            gsap.set(tileEl.querySelector('.expanded-content'), {
-              autoAlpha: 0,
-              pointerEvents: 'none',
-            });
-
-            gsap.to(tileEl, {
-              x: 0,
-              y: 0,
-              width: initialProps.width,
-              height: initialProps.height,
-              opacity: 1,
-              scale: 1,
-              duration: 0.6,
-              ease: 'power3.inOut',
-              zIndex: 1,
-              pointerEvents: 'auto',
-              onComplete: () => {
-                gsap.set(tileEl, { clearProps: 'x,y,width,height,opacity,scale,zIndex,pointerEvents' });
-                gsap.set(tileEl.querySelector('.short-content'), {
-                  autoAlpha: 1,
-                });
-                setIsAnimating(false);
-              },
-            });
-          }
-        }
+  const handleHover = (item: string, isEntering: boolean) => {
+    if (isEntering && detailsData[item as keyof typeof detailsData]) {
+      // Update cursor details through a custom event
+      const event = new CustomEvent('cursorDetails', {
+        detail: detailsData[item as keyof typeof detailsData]
       });
+      window.dispatchEvent(event);
+    } else {
+      // Clear cursor details
+      const event = new CustomEvent('cursorDetails', {
+        detail: undefined
+      });
+      window.dispatchEvent(event);
     }
-  }, [expandedTileId]);
-
-  const handleTileClick = (id: string) => {
-    if (!isAnimating) {
-      if (expandedTileId === id) {
-        setExpandedTileId(null);
-      } else {
-        setExpandedTileId(id);
-      }
-    }
-  };
+  }
 
   return (
     <div
       ref={containerRef}
       className="h-screen w-full dark:bg-black bg-white dark:text-white text-black relative overflow-hidden"
     >
-      <div
-        ref={topRef}
-        className="h-1/2 w-screen dark:bg-black bg-white absolute z-40 flex justify-center items-end"
-      >
+      <div ref={topRef} className="h-1/2 w-screen dark:bg-black bg-white absolute z-40 flex justify-center items-end">
         <div className="h-[15vw] md:h-[25vw] overflow-hidden">
           <div className="text-[15vw] md:text-[25vw] dark:text-white text-black leading-none -translate-y-[-50%]">
             ABOUT
@@ -243,92 +329,113 @@ const About = () => {
       </div>
 
       <div className="h-full w-full absolute dark:bg-black bg-white flex justify-center items-center p-8 overflow-hidden z-0">
-        <div
-          ref={leftDrawerRef}
-          className="absolute inset-y-0 left-0 w-1/2 bg-black dark:bg-white z-30"
-        ></div>
+        <div ref={leftDrawerRef} className="absolute inset-y-0 left-0 w-1/2 bg-black dark:bg-white z-30"></div>
+        <div ref={rightDrawerRef} className="absolute inset-y-0 right-0 w-1/2 bg-black dark:bg-white z-30"></div>
 
-        <div
-          ref={rightDrawerRef}
-          className="absolute inset-y-0 right-0 w-1/2 bg-black dark:bg-white z-30"
-        ></div>
+        {/* Main Content */}
+        <div ref={contentRef} className="relative w-full h-full flex flex-col items-center justify-center opacity-0">
+          {/* Animated Lines */}
+          <div className="absolute inset-0 pointer-events-none">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                ref={(el) => addToRefs(el, i, "lines")}
+                className="absolute h-px bg-black dark:bg-white"
+                style={{
+                  top: `${(i + 1) * 12.5}%`,
+                  left: "10%",
+                  right: "10%",
+                }}
+              />
+            ))}
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i + 8}
+                ref={(el) => addToRefs(el, i + 8, "lines")}
+                className="absolute w-px bg-black dark:bg-white"
+                style={{
+                  left: `${(i + 1) * 16.66}%`,
+                  top: "10%",
+                  bottom: "10%",
+                }}
+              />
+            ))}
+          </div>
 
-        {/* This is the grid container for your tiles */}
-        <div
-          ref={gridContainerRef}
-          className="relative w-[100%] h-[70%] lg:w-[70%] lg:h-[80%]
-                     grid grid-cols-2 grid-rows-2 gap-[1vw]"
-        >
-          {tileData.map((tile, index) => (
-            <div
-              key={tile.id}
-              data-id={tile.id}
-              ref={(el) => {
-                if (el) {
-                  tileRefs.current[index] = el;
-                }
-              }}
-              className={`
-                relative flex flex-col justify-center items-center p-2 rounded-xl shadow-lg
-                cursor-pointer overflow-hidden transition-colors duration-300 ease-in-out
-                ${
-                  expandedTileId === tile.id
-                    ? 'z-50 bg-black dark:bg-white'
-                    : 'z-10 bg-black dark:bg-white'
-                }
-                ${
-                  expandedTileId && expandedTileId !== tile.id
-                    ? 'pointer-events-none'
-                    : 'pointer-events-auto'
-                }
-                ${expandedTileId === tile.id ? 'text-white dark:text-black' : 'text-white dark:text-black'}
-              `}
-              onClick={() => handleTileClick(tile.id)}
-            >
-              <div
-                className={`short-content text-2xl lg:text-6xl text-center
-                  ${expandedTileId === tile.id ? 'opacity-0' : 'opacity-100'}
-                  transition-opacity duration-300`}
-              >
-                {tile.title}
-              </div>
-              <div
-                className={`expanded-content absolute inset-0 flex flex-col justify-center items-center p-2 text-center overflow-y-scroll
-                  ${expandedTileId === tile.id ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-                  transition-opacity duration-150`}
-              >
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setExpandedTileId(null);
-                  }}
-                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full
-                           bg-white dark:bg-black text-black dark:text-white hover:opacity-80
-                           transition-opacity duration-200 z-50"
+          {/* Morphing Shape */}
+          <div
+            ref={morphRef}
+            className="absolute top-1/4 right-1/4 w-32 h-32 border-4 border-black dark:border-white"
+            style={{
+              clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)",
+            }}
+          />
+
+          {/* Central Text */}
+          <div className="text-center z-10">
+            <div ref={textRef} className="text-6xl md:text-8xl font-bold mb-8 tracking-wider font-mono">
+              CREATIVE DEVELOPER
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
+              {[
+                { num: "04", label: "YEARS\nSTUDYING", key: "education" },
+                { num: "01", label: "INTERNSHIP\nCOMPLETED", key: "internship" },
+                { num: "15", label: "PROJECTS\nBUILT", key: "projects" },
+                { num: "04", label: "CORE\nINTERESTS", key: "hobbies" },
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  ref={(el) => addToRefs(el, index, "numbers")}
+                  className="text-center border border-black dark:border-white p-6 relative overflow-hidden group cursor-pointer"
+                  onMouseEnter={() => handleHover(item.key, true)}
+                  onMouseLeave={() => handleHover(item.key, false)}
+                  data-info-tile
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-                <h3 className="text-sm md:text-5xl font-bold mb-4">
-                  {tile.title}
-                </h3>
-                <p className="text-sm md:text-xl leading-relaxed">
-                  {tile.longInfo}
-                </p>
+                  <div className="absolute inset-0 bg-black dark:bg-white scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                  <div className="relative z-10 group-hover:text-white dark:group-hover:text-black transition-colors duration-500">
+                    <div className="text-4xl font-bold font-mono mb-2">{item.num}</div>
+                    <div className="text-xs font-bold tracking-widest whitespace-pre-line">{item.label}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Education & Experience Details */}
+          <div ref={detailsRef} className="absolute top-16 left-16 text-left opacity-0">
+            <div className="text-xs font-mono tracking-widest mb-2 opacity-60">BACKGROUND</div>
+            <div className="text-sm font-bold">Computer Science Student</div>
+            <div className="text-xs opacity-80">Passionate about Frontend Development</div>
+          </div>
+
+          {/* Geometric Patterns */}
+          <div className="absolute bottom-10 left-10 w-20 h-20 border-2 border-black dark:border-white rotate-45" />
+          <div className="absolute top-10 left-1/3 w-4 h-4 bg-black dark:bg-white rounded-full" />
+          <div className="absolute top-1/3 right-10 w-16 h-16 border border-black dark:border-white" />
+          <div className="absolute bottom-1/4 right-1/3 w-8 h-8 bg-black dark:bg-white transform rotate-45" />
+
+          {/* Contact Information */}
+          <div
+            ref={contactRef}
+            className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-center opacity-0"
+          >
+            <div className="text-sm font-mono tracking-widest mb-4">GET IN TOUCH</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+              <div className="border border-black dark:border-white p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer">
+                <div className="font-bold mb-1">EMAIL</div>
+                <div className="opacity-60">hello@yourname.com</div>
+              </div>
+              <div className="border border-black dark:border-white p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer">
+                <div className="font-bold mb-1">LINKEDIN</div>
+                <div className="opacity-60">@yourname</div>
+              </div>
+              <div className="border border-black dark:border-white p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer">
+                <div className="font-bold mb-1">GITHUB</div>
+                <div className="opacity-60">@yourname</div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
@@ -343,7 +450,7 @@ const About = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default About;
+export default About

@@ -8,6 +8,8 @@
   scrollbar-width: none;
 }
 
+
+
 @keyframes wave {
   0% { transform: rotate(0deg); }
   10% { transform: rotate(-20deg); }
