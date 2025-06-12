@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { TextPlugin } from "gsap/TextPlugin"
+import { motion, AnimatePresence } from "framer-motion"
 
 gsap.registerPlugin(ScrollTrigger, TextPlugin)
 
@@ -23,6 +24,9 @@ const About = () => {
   const contactRef = useRef<HTMLDivElement>(null)
 
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  const [activeItem, setActiveItem] = useState<string | null>(null)
+  const [showDetails, setShowDetails] = useState(false)
 
   const detailsData = {
     education: {
@@ -57,6 +61,13 @@ const About = () => {
       details: ["Digital Art & Design", "Photography", "Open Source Contributing", "Learning New Technologies"],
     },
   }
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     const mainTl = gsap.timeline({
@@ -247,7 +258,7 @@ const About = () => {
       // Morphing shape continuous rotation
       gsap.to(morphRef.current, {
         rotation: "+=360",
-        duration: 20,
+        duration: 10,
         repeat: -1,
         ease: "none",
       })
@@ -300,6 +311,8 @@ const About = () => {
   }
 
   const handleHover = (item: string, isEntering: boolean) => {
+    if (isMobile) return // Disable hover effects on mobile
+    
     if (isEntering && detailsData[item as keyof typeof detailsData]) {
       // Update cursor details through a custom event
       const event = new CustomEvent('cursorDetails', {
@@ -310,6 +323,26 @@ const About = () => {
       // Clear cursor details
       const event = new CustomEvent('cursorDetails', {
         detail: undefined
+      });
+      window.dispatchEvent(event);
+    }
+  }
+
+  const handleClick = (item: string) => {
+    if (!isMobile) return // Only handle clicks on mobile
+    
+    if (activeItem === item) {
+      setActiveItem(null)
+      setShowDetails(false)
+      const event = new CustomEvent('cursorDetails', {
+        detail: undefined
+      });
+      window.dispatchEvent(event);
+    } else {
+      setActiveItem(item)
+      setShowDetails(true)
+      const event = new CustomEvent('cursorDetails', {
+        detail: detailsData[item as keyof typeof detailsData]
       });
       window.dispatchEvent(event);
     }
@@ -334,8 +367,8 @@ const About = () => {
 
         {/* Main Content */}
         <div ref={contentRef} className="relative w-full h-full flex flex-col items-center justify-center opacity-0">
-          {/* Animated Lines */}
-          <div className="absolute inset-0 pointer-events-none">
+          {/* Animated Lines - Hidden on Mobile */}
+          <div className="absolute inset-0 pointer-events-none hidden md:block">
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
@@ -362,6 +395,70 @@ const About = () => {
             ))}
           </div>
 
+          {/* Mobile Details Modal */}
+          <AnimatePresence>
+            {isMobile && showDetails && activeItem && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+              >
+                <motion.div 
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="bg-white dark:bg-black border border-black dark:border-white p-6 rounded-lg max-w-[90%] w-[400px]"
+                >
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-xl font-bold mb-4"
+                  >
+                    {detailsData[activeItem as keyof typeof detailsData].title}
+                  </motion.div>
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="space-y-2"
+                  >
+                    {detailsData[activeItem as keyof typeof detailsData].details.map((detail, index) => (
+                      <motion.div 
+                        key={index}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.4 + (index * 0.1) }}
+                        className="text-sm"
+                      >
+                        {detail}
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                  <motion.button 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    onClick={() => {
+                      setShowDetails(false)
+                      setActiveItem(null)
+                      const event = new CustomEvent('cursorDetails', {
+                        detail: undefined
+                      });
+                      window.dispatchEvent(event);
+                    }}
+                    className="mt-6 px-4 py-2 border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300"
+                  >
+                    Close
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Morphing Shape */}
           <div
             ref={morphRef}
@@ -377,7 +474,7 @@ const About = () => {
               CREATIVE DEVELOPER
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-8 md:mt-16">
               {[
                 { num: "04", label: "YEARS\nSTUDYING", key: "education" },
                 { num: "01", label: "INTERNSHIP\nCOMPLETED", key: "internship" },
@@ -387,15 +484,26 @@ const About = () => {
                 <div
                   key={index}
                   ref={(el) => addToRefs(el, index, "numbers")}
-                  className="text-center border border-black dark:border-white p-6 relative overflow-hidden group cursor-pointer"
+                  className={`text-center border border-black bg-white dark:bg-black dark:border-white p-4 md:p-6 relative overflow-hidden group cursor-pointer ${
+                    isMobile && activeItem === item.key ? 'scale-x-100' : ''
+                  }`}
                   onMouseEnter={() => handleHover(item.key, true)}
                   onMouseLeave={() => handleHover(item.key, false)}
+                  onClick={() => handleClick(item.key)}
                   data-info-tile
                 >
-                  <div className="absolute inset-0 bg-black dark:bg-white scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-                  <div className="relative z-10 group-hover:text-white dark:group-hover:text-black transition-colors duration-500">
-                    <div className="text-4xl font-bold font-mono mb-2">{item.num}</div>
-                    <div className="text-xs font-bold tracking-widest whitespace-pre-line">{item.label}</div>
+                  <div className={`absolute inset-0 bg-black dark:bg-white ${
+                    isMobile 
+                      ? activeItem === item.key ? 'scale-x-100' : 'scale-x-0'
+                      : 'scale-x-0 group-hover:scale-x-100'
+                  } transition-transform duration-500 origin-left`} />
+                  <div className={`relative z-10 ${
+                    isMobile
+                      ? activeItem === item.key ? 'text-white dark:text-black' : ''
+                      : 'group-hover:text-white dark:group-hover:text-black'
+                  } transition-colors duration-500`}>
+                    <div className="text-2xl md:text-4xl font-bold font-mono mb-2">{item.num}</div>
+                    <div className="text-[10px] md:text-xs font-bold tracking-widest whitespace-pre-line">{item.label}</div>
                   </div>
                 </div>
               ))}
@@ -403,36 +511,37 @@ const About = () => {
           </div>
 
           {/* Education & Experience Details */}
-          <div ref={detailsRef} className="absolute top-16 left-16 text-left opacity-0">
-            <div className="text-xs font-mono tracking-widest mb-2 opacity-60">BACKGROUND</div>
-            <div className="text-sm font-bold">Computer Science Student</div>
-            <div className="text-xs opacity-80">Passionate about Frontend Development</div>
+          <div ref={detailsRef} className="absolute top-8 md:top-16 left-8 md:left-16 text-left opacity-0">
+            <div className="text-[10px] md:text-xs font-mono tracking-widest mb-2 opacity-60">BACKGROUND</div>
+            <div className="text-xs md:text-sm font-bold">Computer Science Student</div>
+            <div className="text-[10px] md:text-xs opacity-80">Passionate about Frontend Development</div>
           </div>
 
           {/* Geometric Patterns */}
-          <div className="absolute bottom-10 left-10 w-20 h-20 border-2 border-black dark:border-white rotate-45" />
-          <div className="absolute top-10 left-1/3 w-4 h-4 bg-black dark:bg-white rounded-full" />
-          <div className="absolute top-1/3 right-10 w-16 h-16 border border-black dark:border-white" />
-          <div className="absolute bottom-1/4 right-1/3 w-8 h-8 bg-black dark:bg-white transform rotate-45" />
+          <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 w-12 md:w-20 h-12 md:h-20 border-2 border-black dark:border-white rotate-45" />
+          <div className="absolute top-6 md:top-10 left-1/3 w-3 md:w-4 h-3 md:h-4 bg-black dark:bg-white rounded-full" />
+          <div className="absolute top-1/3 right-6 md:right-10 w-10 md:w-16 h-10 md:h-16 border border-black dark:border-white" />
+          <div className="absolute bottom-1/4 right-1/3 w-5 md:w-8 h-5 md:h-8 bg-black dark:bg-white transform rotate-45" />
 
           {/* Contact Information */}
           <div
             ref={contactRef}
-            className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-center opacity-0"
+            className="absolute bottom-0 md:left-0 lg:left-1/2 w-full px-8 text-center opacity-0 flex flex-col 
+                       md:bottom-20 md:-translate-x-1/2 md:w-auto"
           >
-            <div className="text-sm font-mono tracking-widest mb-4">GET IN TOUCH</div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-              <div className="border border-black dark:border-white p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer">
-                <div className="font-bold mb-1">EMAIL</div>
-                <div className="opacity-60">hello@yourname.com</div>
+            <div className="text-[10px] md:text-sm font-mono tracking-widest mb-2 md:mb-4">GET IN TOUCH</div>
+            <div className="flex justify-center gap-2 md:gap-6 w-full max-w-xs md:max-w-none text-[8px] md:text-xs"> {/* flex-col for mobile, max-w-xs to constrain width, md:flex-row for desktop */}
+              <div className="border border-black dark:border-white p-1.5 md:p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer w-full md:w-[200px]"> {/* w-full for mobile */}
+                <div className="font-bold mb-0.5 md:mb-1">EMAIL</div>
+                <div className="opacity-60 text-[7px] md:text-xs truncate md:whitespace-normal">hello@yourname.com</div>
               </div>
-              <div className="border border-black dark:border-white p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer">
-                <div className="font-bold mb-1">LINKEDIN</div>
-                <div className="opacity-60">@yourname</div>
+              <div className="border border-black dark:border-white p-1.5 md:p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer w-full md:w-[200px]"> {/* w-full for mobile */}
+                <div className="font-bold mb-0.5 md:mb-1">LINKEDIN</div>
+                <div className="opacity-60 text-[7px] md:text-xs truncate md:whitespace-normal">@yourname</div>
               </div>
-              <div className="border border-black dark:border-white p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer">
-                <div className="font-bold mb-1">GITHUB</div>
-                <div className="opacity-60">@yourname</div>
+              <div className="border border-black dark:border-white p-1.5 md:p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer w-full md:w-[200px]"> {/* w-full for mobile */}
+                <div className="font-bold mb-0.5 md:mb-1">GITHUB</div>
+                <div className="opacity-60 text-[7px] md:text-xs truncate md:whitespace-normal">@yourname</div>
               </div>
             </div>
           </div>

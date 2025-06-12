@@ -129,8 +129,8 @@ const Cursor = () => {
           relative
           ${details ? 'rounded-3xl' : 'rounded-full'}
           ${details ? 'bg-black' : 'bg-[#000000]'}
-          ${details ? '' : 'dark:bg-[#ffffff]'}
-          ${details ? 'text-white' : ''}
+          ${details ? 'bg=black' : 'dark:bg-[#ffffff]'}
+          ${details ? 'text-white' : 'text-black'}
           invert-0
           transition-all
           duration-200
@@ -142,12 +142,12 @@ const Cursor = () => {
         `}
         >
           {isHovering && (
-            <div className={`${details ? "absolute top-0 left-0 w-full h-full flex flex-col justify-start items-start p-8" : "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120px] text-center"} font-mono`}> 
+            <div className={`${details ? "text-white rounded-lg dark:bg-white dark:text-black absolute top-0 left-0 w-full h-full flex flex-col justify-start items-start p-8" : "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120px] text-center"} font-mono`}> 
               {details ? (
                 <>
                   <div className="font-bold text-xl mb-4">{details.title}</div>
                   {details.details.map((detail, i) => (
-                    <div key={i} className="text-base text-white mb-1 text-left whitespace-pre-line">{detail}</div>
+                    <div key={i} className="text-base mb-1 text-left whitespace-pre-line">{detail}</div>
                   ))}
                 </>
               ) : (
