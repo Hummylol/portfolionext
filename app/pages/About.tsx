@@ -83,7 +83,11 @@ const About = () => {
     // Create animated dots
     const createDots = () => {
       const container = contentRef.current
-      if (!container) return
+      if (!container || isMobile) return // Don't create dots on mobile
+
+      // Clear any existing dots first
+      dotsRef.current.forEach(dot => dot.remove())
+      dotsRef.current = []
 
       for (let i = 0; i < 50; i++) {
         const dot = document.createElement("div")
@@ -99,8 +103,10 @@ const About = () => {
 
     // Initial states
     gsap.set(contentRef.current, { opacity: 0 })
-    gsap.set(dotsRef.current, { scale: 0, opacity: 0 })
-    gsap.set(linesRef.current, { scaleX: 0, transformOrigin: "left center" })
+    if (!isMobile) {
+      gsap.set(dotsRef.current, { scale: 0, opacity: 0 })
+      gsap.set(linesRef.current, { scaleX: 0, transformOrigin: "left center" })
+    }
     gsap.set(textRef.current, { y: 100, opacity: 0 })
     gsap.set(morphRef.current, { scale: 0, rotation: 0 })
     gsap.set(numbersRef.current, { y: 50, opacity: 0 })
@@ -150,22 +156,36 @@ const About = () => {
       "0.5",
     )
 
-    // Animated dots explosion
-    mainTl.to(
-      dotsRef.current,
-      {
-        scale: 1,
-        opacity: 1,
-        duration: 1.5,
-        stagger: {
-          amount: 0.8,
-          from: "center",
-          grid: "auto",
+    // Animated dots explosion - only on desktop
+    if (!isMobile) {
+      mainTl.to(
+        dotsRef.current,
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 1.5,
+          stagger: {
+            amount: 0.8,
+            from: "center",
+            grid: "auto",
+          },
+          ease: "back.out(2)",
         },
-        ease: "back.out(2)",
-      },
-      "0.6",
-    )
+        "0.6",
+      )
+
+      // Lines animation
+      mainTl.to(
+        linesRef.current,
+        {
+          scaleX: 1,
+          duration: 1,
+          stagger: 0.1,
+          ease: "power3.out",
+        },
+        "0.8",
+      )
+    }
 
     // Morphing shape animation
     mainTl.to(
@@ -177,18 +197,6 @@ const About = () => {
         ease: "power2.out",
       },
       "0.7",
-    )
-
-    // Lines animation
-    mainTl.to(
-      linesRef.current,
-      {
-        scaleX: 1,
-        duration: 1,
-        stagger: 0.1,
-        ease: "power3.out",
-      },
-      "0.8",
     )
 
     // Text reveal with typewriter effect
@@ -242,18 +250,20 @@ const About = () => {
 
     // Continuous animations
     const continuousAnimations = () => {
-      // Floating dots
-      dotsRef.current.forEach((dot, i) => {
-        gsap.to(dot, {
-          y: "random(-20, 20)",
-          x: "random(-20, 20)",
-          duration: "random(2, 4)",
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: i * 0.1,
+      if (!isMobile) {
+        // Floating dots
+        dotsRef.current.forEach((dot, i) => {
+          gsap.to(dot, {
+            y: "random(-20, 20)",
+            x: "random(-20, 20)",
+            duration: "random(2, 4)",
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: i * 0.1,
+          })
         })
-      })
+      }
 
       // Morphing shape continuous rotation
       gsap.to(morphRef.current, {
@@ -300,7 +310,7 @@ const About = () => {
       dotsRef.current.forEach((dot) => dot.remove())
       dotsRef.current = []
     }
-  }, [])
+  }, [isMobile])
 
   const addToRefs = (el: HTMLDivElement | null, index: number, type: "lines" | "numbers") => {
     if (el && type === "lines") {
@@ -368,32 +378,34 @@ const About = () => {
         {/* Main Content */}
         <div ref={contentRef} className="relative w-full h-full flex flex-col items-center justify-center opacity-0">
           {/* Animated Lines - Hidden on Mobile */}
-          <div className="absolute inset-0 pointer-events-none hidden md:block">
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                ref={(el) => addToRefs(el, i, "lines")}
-                className="absolute h-px bg-black dark:bg-white"
-                style={{
-                  top: `${(i + 1) * 12.5}%`,
-                  left: "10%",
-                  right: "10%",
-                }}
-              />
-            ))}
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i + 8}
-                ref={(el) => addToRefs(el, i + 8, "lines")}
-                className="absolute w-px bg-black dark:bg-white"
-                style={{
-                  left: `${(i + 1) * 16.66}%`,
-                  top: "10%",
-                  bottom: "10%",
-                }}
-              />
-            ))}
-          </div>
+          {!isMobile && (
+            <div className="absolute inset-0 pointer-events-none">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  ref={(el) => addToRefs(el, i, "lines")}
+                  className="absolute h-px bg-black dark:bg-white"
+                  style={{
+                    top: `${(i + 1) * 12.5}%`,
+                    left: "10%",
+                    right: "10%",
+                  }}
+                />
+              ))}
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i + 8}
+                  ref={(el) => addToRefs(el, i + 8, "lines")}
+                  className="absolute w-px bg-black dark:bg-white"
+                  style={{
+                    left: `${(i + 1) * 16.66}%`,
+                    top: "10%",
+                    bottom: "10%",
+                  }}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Mobile Details Modal */}
           <AnimatePresence>
@@ -410,7 +422,7 @@ const About = () => {
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.8, opacity: 0 }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="bg-white dark:bg-black border border-black dark:border-white p-6 rounded-lg max-w-[90%] w-[400px]"
+                  className="bg-white dark:bg-black border border-black dark:border-white p-6 max-w-[90%] w-[400px]"
                 >
                   <motion.div 
                     initial={{ y: 20, opacity: 0 }}
@@ -439,8 +451,8 @@ const About = () => {
                     ))}
                   </motion.div>
                   <motion.button 
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     transition={{ delay: 0.6 }}
                     onClick={() => {
                       setShowDetails(false)
@@ -459,14 +471,16 @@ const About = () => {
             )}
           </AnimatePresence>
 
-          {/* Morphing Shape */}
-          <div
-            ref={morphRef}
-            className="absolute top-1/4 right-1/4 w-32 h-32 border-4 border-black dark:border-white"
-            style={{
-              clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)",
-            }}
-          />
+          {/* Morphing Shape - Hidden on Mobile */}
+          {!isMobile && (
+            <div
+              ref={morphRef}
+              className="absolute top-1/4 right-1/4 w-32 h-32 border-4 border-black dark:border-white"
+              style={{
+                clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)",
+              }}
+            />
+          )}
 
           {/* Central Text */}
           <div className="text-center z-10">
@@ -517,11 +531,15 @@ const About = () => {
             <div className="text-[10px] md:text-xs opacity-80">Passionate about Frontend Development</div>
           </div>
 
-          {/* Geometric Patterns */}
-          <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 w-12 md:w-20 h-12 md:h-20 border-2 border-black dark:border-white rotate-45" />
-          <div className="absolute top-6 md:top-10 left-1/3 w-3 md:w-4 h-3 md:h-4 bg-black dark:bg-white rounded-full" />
-          <div className="absolute top-1/3 right-6 md:right-10 w-10 md:w-16 h-10 md:h-16 border border-black dark:border-white" />
-          <div className="absolute bottom-1/4 right-1/3 w-5 md:w-8 h-5 md:h-8 bg-black dark:bg-white transform rotate-45" />
+          {/* Geometric Patterns - Hidden on Mobile */}
+          {!isMobile && (
+            <>
+              <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 w-12 md:w-20 h-12 md:h-20 border-2 border-black dark:border-white rotate-45" />
+              <div className="absolute top-6 md:top-10 left-1/3 w-3 md:w-4 h-3 md:h-4 bg-black dark:bg-white rounded-full" />
+              <div className="absolute top-1/3 right-6 md:right-10 w-10 md:w-16 h-10 md:h-16 border border-black dark:border-white" />
+              <div className="absolute bottom-1/4 right-1/3 w-5 md:w-8 h-5 md:h-8 bg-black dark:bg-white transform rotate-45" />
+            </>
+          )}
 
           {/* Contact Information */}
           <div
