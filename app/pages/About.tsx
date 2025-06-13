@@ -548,19 +548,48 @@ const About = () => {
                        md:bottom-20 md:-translate-x-1/2 md:w-auto"
           >
             <div className="text-[10px] md:text-sm font-mono tracking-widest mb-2 md:mb-4">GET IN TOUCH</div>
-            <div className="flex justify-center gap-2 md:gap-6 w-full max-w-xs md:max-w-none text-[8px] md:text-xs"> {/* flex-col for mobile, max-w-xs to constrain width, md:flex-row for desktop */}
-              <div className="border border-black dark:border-white p-1.5 md:p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer w-full md:w-[200px]"> {/* w-full for mobile */}
+            <div className="flex justify-center gap-2 md:gap-6 w-full max-w-xs md:max-w-none text-[8px] md:text-xs">
+              <div 
+                className="border border-black dark:bg-black bg-white dark:border-white p-1.5 md:p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer w-full md:w-[200px]"
+                onClick={() => {
+                  navigator.clipboard.writeText('humaidsadath2004@gmail.com');
+                  // Optional: Add a visual feedback that email was copied
+                  const element = document.createElement('div');
+                  element.textContent = 'Email copied!';
+                  element.style.position = 'fixed';
+                  element.style.top = '20px';
+                  element.style.left = '50%';
+                  element.style.transform = 'translateX(-50%)';
+                  element.style.backgroundColor = 'black';
+                  element.style.color = 'white';
+                  element.style.padding = '8px 16px';
+                  element.style.borderRadius = '4px';
+                  element.style.zIndex = '1000';
+                  document.body.appendChild(element);
+                  setTimeout(() => element.remove(), 2000);
+                }}
+              >
                 <div className="font-bold mb-0.5 md:mb-1">EMAIL</div>
-                <div className="opacity-60 text-[7px] md:text-xs truncate md:whitespace-normal">hello@yourname.com</div>
+                <div className="opacity-60 text-[7px] md:text-xs truncate md:whitespace-normal">humaidsadath2004@gmail.com</div>
               </div>
-              <div className="border border-black dark:border-white p-1.5 md:p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer w-full md:w-[200px]"> {/* w-full for mobile */}
+              <a 
+                href="https://www.linkedin.com/in/humayd-sadath-8b2b2b2b2/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="border border-black dark:bg-black bg-white dark:border-white p-1.5 md:p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer w-full md:w-[200px]"
+              >
                 <div className="font-bold mb-0.5 md:mb-1">LINKEDIN</div>
-                <div className="opacity-60 text-[7px] md:text-xs truncate md:whitespace-normal">@yourname</div>
-              </div>
-              <div className="border border-black dark:border-white p-1.5 md:p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer w-full md:w-[200px]"> {/* w-full for mobile */}
+                <div className="opacity-60 text-[7px] md:text-xs truncate md:whitespace-normal">@humaydsadath</div>
+              </a>
+              <a 
+                href="https://github.com/Hummylol" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="border border-black dark:bg-black bg-white dark:border-white p-1.5 md:p-3 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 cursor-pointer w-full md:w-[200px]"
+              >
                 <div className="font-bold mb-0.5 md:mb-1">GITHUB</div>
-                <div className="opacity-60 text-[7px] md:text-xs truncate md:whitespace-normal">@yourname</div>
-              </div>
+                <div className="opacity-60 text-[7px] md:text-xs truncate md:whitespace-normal">@Hummylol</div>
+              </a>
             </div>
           </div>
         </div>

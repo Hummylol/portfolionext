@@ -129,8 +129,8 @@ const Cursor = () => {
           relative
           ${details ? 'rounded-3xl' : 'rounded-full'}
           ${details ? 'bg-black' : 'bg-[#000000]'}
-          ${details ? 'bg=black' : 'dark:bg-[#ffffff]'}
-          ${details ? 'text-white' : 'text-black'}
+          ${details ? 'bg-black' : 'dark:bg-[#ffffff]'}
+          ${details ? 'text-white' : 'text-white dark:text-black'}
           invert-0
           transition-all
           duration-200

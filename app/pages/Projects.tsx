@@ -7,11 +7,11 @@ import { Link, X, Github, ExternalLink } from "lucide-react";
 const projects = [
   { name: "Chat App", github: "https://github.com/Hummylol/oneonone", external: "https://humaidchat.vercel.app/", video: "chat-app-preview.mp4" },
   { name: "MindCare", github: "https://github.com/Hummylol/mindcare", external: "https://mindcarejce.vercel.app/", video: "mental-health-preview.mp4" },
-  { name: "Portfolio", github: "https://github.com/Hummylol/portfolionext", video: "portfolio-preview.mp4" },
   { name: "Devsistant", github: "https://github.com/Hummylol/devsistant", external: "https://devsistant.vercel.app/", video: "devsistant-preview.mp4" },
   { name: "Code Share", github: "https://github.com/Hummylol/code-share", external: "https://analanbu.vercel.app", video: "code-share-preview.mp4" },
   { name: "Spotique", github: "https://github.com/yourusername/music-player", video: "music-player-preview.mp4" },
   { name: "LLM", github: "https://github.com/yourusername/llm", video: "llm-preview.mp4" },
+  { name: "Portfolio", github: "https://github.com/Hummylol/portfolionext" },
 ];
 
 const CustomCursor = ({
